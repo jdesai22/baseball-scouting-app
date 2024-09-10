@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "react-native";
 import * as Location from "expo-location";
 
@@ -9,12 +9,9 @@ interface GetLocationProps {
 const GetLocationButton: React.FC<GetLocationProps> = ({
   handleSetLocation,
 }) => {
-  // const [locationFound, setLocationFound] = React.useState(false);
+  const [buttonTitle, setButtonTitle] = useState("Get Location");
 
   const handleGetLocation = async () => {
-    // console.log(GetLocation.openSettings());
-    // if (hasLocationPermission) {
-    // }
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
       console.warn("Permission to access location was denied");
@@ -23,13 +20,12 @@ const GetLocationButton: React.FC<GetLocationProps> = ({
 
     let location = await Location.getCurrentPositionAsync({});
     handleSetLocation(location);
-    // if (location) {
-    //   setLocationFound(true);
-    // }
+
+    setButtonTitle("Get Location Again");
   };
 
   return (
-    <Button title="Get Location" onPress={handleGetLocation} color={"black"} />
+    <Button title={buttonTitle} onPress={handleGetLocation} color={"black"} />
   );
 };
 
