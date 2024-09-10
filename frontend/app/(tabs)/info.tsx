@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { View, Text, StyleSheet, Button } from "react-native";
 import ReportTable from "@/components/ReportTable";
@@ -26,13 +26,12 @@ export default function TabTwoScreen() {
     ],
   };
 
+  const [sortedTableData, setSortedTableData] = useState<string[][]>([]);
+  const [displayedData, setDisplayedData] = useState<string[][]>([]);
+  const [totalPages, setTotalPages] = useState(0);
+
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 25;
-
-  const sortedTableData = castTableDataToString(
-    sortTableData(exampleData.tableData)
-  );
-  const totalPages = Math.ceil(sortedTableData.length / rowsPerPage);
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
@@ -46,9 +45,43 @@ export default function TabTwoScreen() {
     }
   };
 
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const displayedData = sortedTableData.slice(startIndex, endIndex);
+  useEffect(() => {
+    setSortedTableData(
+      castTableDataToString(sortTableData(exampleData.tableData))
+    );
+
+    const requestOptions = {
+      method: "GET",
+    };
+
+    fetch("http://localhost:3000/players", requestOptions)
+      .then((response) => response.json())
+      .then((json) => {
+        const tableData = json.map(
+          (player: { name: any; ovr: any; street_address: any }) => {
+            if (
+              player.street_address === null ||
+              player.street_address === ""
+            ) {
+              player.street_address = "N/A";
+            }
+            return [player.name, player.ovr, player.street_address];
+          }
+        );
+
+        console.log(tableData);
+        setSortedTableData(castTableDataToString(sortTableData(tableData)));
+      })
+      .catch((error) => console.log("error", error));
+  }, []);
+
+  useEffect(() => {
+    setTotalPages(Math.ceil(sortedTableData.length / rowsPerPage));
+
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    setDisplayedData(sortedTableData.slice(startIndex, endIndex));
+  }, [sortedTableData, currentPage]);
 
   return (
     <View style={styles.container}>

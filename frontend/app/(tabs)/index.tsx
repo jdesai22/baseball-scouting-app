@@ -16,8 +16,45 @@ export default function HomeScreen() {
   const [hittingRating, setHittingRating] = useState(3);
   const [location, setLocation] = useState({});
   const [additionalNotes, setAdditionalNotes] = useState("");
-  const handleSubmit = () => {
-    console.log("formsubmitted");
+
+  const handleSubmit = async () => {
+    let ovr = ((fieldingRating + pitchingRating + hittingRating) / 3).toFixed(
+      2
+    );
+
+    const reqbody = {
+      name: firstName + " " + lastName,
+      fname: firstName,
+      lname: lastName,
+      fielding: fieldingRating,
+      pitching: pitchingRating,
+      hitting: hittingRating,
+      ovr: ovr,
+      location: location,
+      notes: additionalNotes,
+    };
+
+    const reqHeaders = new Headers();
+    reqHeaders.append("Content-Type", "application/json");
+
+    const requestOptions = {
+      method: "POST",
+      headers: reqHeaders,
+      body: JSON.stringify(reqbody),
+    };
+
+    fetch("http://localhost:3000/addPlayer", requestOptions)
+      .then((response) => response.text())
+      .then((result) => console.log(result))
+      .catch((error) => console.log("error", error));
+
+    setFirstName("");
+    setLastName("");
+    setFieldingRating(3);
+    setPitchingRating(3);
+    setHittingRating(3);
+    setLocation({});
+    setAdditionalNotes("");
   };
   return (
     <ParallaxScrollView
