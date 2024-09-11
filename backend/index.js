@@ -32,7 +32,6 @@ app.post("/addPlayer", async (req, res) => {
   console.log(req.body);
 
   const location = req.body.location;
-  console.log(config.googlaMapsApiKey);
 
   let street_address = "";
 
@@ -40,7 +39,9 @@ app.post("/addPlayer", async (req, res) => {
     const lat = location.coords.latitude.toString();
     const lng = location.coords.longitude.toString();
 
-    const requrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&location_type=APPROXIMATE&result_type=street_address&key=${config.googlaMapsApiKey}`;
+    const requrl =
+      `https://maps.googleapis.com/maps/api/geocode/` +
+      `json?latlng=${lat},${lng}&location_type=APPROXIMATE&result_type=street_address&key=${config.googlaMapsApiKey}`;
 
     const response = await fetch(requrl);
 

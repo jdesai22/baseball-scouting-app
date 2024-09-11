@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { View, Text, StyleSheet, Button } from "react-native";
 import ReportTable from "@/components/ReportTable";
+import { useIsFocused } from "@react-navigation/native";
 
 const sortTableData = (data: (number | string)[][]): (number | string)[][] => {
   return data.sort((a, b) => {
@@ -45,35 +46,37 @@ export default function TabTwoScreen() {
     }
   };
 
+  const isFocused = useIsFocused();
+
   useEffect(() => {
-    setSortedTableData(
-      castTableDataToString(sortTableData(exampleData.tableData))
-    );
+    console.log("isFocused", isFocused);
+    if (isFocused) {
+      console.log("fetching data");
+      const requestOptions = {
+        method: "GET",
+      };
 
-    const requestOptions = {
-      method: "GET",
-    };
-
-    fetch("http://localhost:3000/players", requestOptions)
-      .then((response) => response.json())
-      .then((json) => {
-        const tableData = json.map(
-          (player: { name: any; ovr: any; street_address: any }) => {
-            if (
-              player.street_address === null ||
-              player.street_address === ""
-            ) {
-              player.street_address = "N/A";
+      fetch("http://localhost:3000/players", requestOptions)
+        .then((response) => response.json())
+        .then((json) => {
+          const tableData = json.map(
+            (player: { name: any; ovr: any; street_address: any }) => {
+              if (
+                player.street_address === null ||
+                player.street_address === ""
+              ) {
+                player.street_address = "N/A";
+              }
+              return [player.name, player.ovr, player.street_address];
             }
-            return [player.name, player.ovr, player.street_address];
-          }
-        );
+          );
 
-        console.log(tableData);
-        setSortedTableData(castTableDataToString(sortTableData(tableData)));
-      })
-      .catch((error) => console.log("error", error));
-  }, []);
+          console.log(tableData);
+          setSortedTableData(castTableDataToString(sortTableData(tableData)));
+        })
+        .catch((error) => console.log("error", error));
+    }
+  }, [isFocused]);
 
   useEffect(() => {
     setTotalPages(Math.ceil(sortedTableData.length / rowsPerPage));
